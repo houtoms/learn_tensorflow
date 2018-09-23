@@ -1,13 +1,18 @@
 import os.path
 import re
+# To run the codes:
+# $ git clone https://github.com/tensorflow/models.git
+# $ cd models/tutorials/image/cifar10
+
 import time
 import numpy as np
 import tensorflow as tf
-import cifar10
+import sys
+import cifar10, cifar10_input
 
 batch_size = 128
 max_steps = 10000000
-num_gpus = 4
+num_gpus = 2
 
 def tower_loss(scope):
   images, labels = cifar10.distorted_inputs()
@@ -34,15 +39,15 @@ def average_gradients(tower_grads):
   return average_grads
 
 def train():
-  with tf.Graph.as_default(), tf.device('/cpu:0'):
+  with tf.Graph().as_default(), tf.device('/cpu:0'):
     global_step = tf.get_variable('global_step', [],
                                   initializer=tf.constant_initializer(0),
                                   trainable=False)
-    num_batches_per_epoch = cifar10.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN / \
-                                batch_size
+    num_batches_per_epoch = (cifar10.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN /
+                                batch_size)
     decay_steps = int(num_batches_per_epoch * cifar10.NUM_EPOCHS_PER_DECAY)
 
-    lr = tf.train.exponential_decay(cifar10, INITIAL_LEARNING_RATE,
+    lr = tf.train.exponential_decay(cifar10.INITIAL_LEARNING_RATE,
                                     global_step,
                                     decay_steps,
                                     cifar10.LEARNING_RATE_DECAY_FACTOR,
